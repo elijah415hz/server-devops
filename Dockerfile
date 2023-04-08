@@ -1,6 +1,6 @@
 FROM ubuntu
+WORKDIR /webserver
 COPY ./webserver.sh .
+RUN chmod +x webserver.sh
 
-VOLUME /hostpipe
-
-ENTRYPOINT [ "webserver.sh" ]
+ENTRYPOINT [ "./webserver.sh" ]
