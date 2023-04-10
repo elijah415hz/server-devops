@@ -1,11 +1,12 @@
-#!/bin/bash
-# Test suite for webserver
-# Test pipe functionality
-
-docker run --rm \
-   -v /var/run/docker.sock:/var/run/docker.sock \
-   -v "$(pwd)"/:/tmp/host \
-   -e HOST_CWD="$(pwd)" \
-   --entrypoint /tmp/host/webserver_test_pt_2.sh \
-   docker
-echo "Back on the host"
+#!/bin/sh
+cd /tmp/host
+echo "making the pipe..."
+mkfifo test-pipe
+echo "listening to the pipe..."
+eval "$(cat test-pipe)" &
+echo "building the test container..."
+docker build . -t "webserver"
+echo "running the test container..."
+docker run --rm -v "$HOST_CWD"/test-pipe:/webserver/pipe webserver
+echo "Back on the container container..."
+``
