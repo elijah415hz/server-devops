@@ -1,5 +1,7 @@
 FROM ubuntu
 WORKDIR /webserver
+RUN apt-get -y update && apt-get -y install netcat
+
 COPY ./webserver.sh .
 RUN chmod +x webserver.sh
 
