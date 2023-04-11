@@ -27,7 +27,44 @@ function handleRequest() {
 
         ## Breaks the loop when line is empty
         [ -z "$trline" ] && break
+
+        ## Parses the headline
+        ## e.g GET /login HTTP/1.1 -> GET /login
+        HEADLINE_REGEX='(.*?)\s(.*?)\sHTTP.*?'
+        [[ "$trline" =~ $HEADLINE_REGEX ]] &&
+            REQUEST=$(echo $trline | sed -E "s/$HEADLINE_REGEX/\1 \2/")
+
+        ## Parses the Content-Length header
+        ## e.g Content-Length: 42 -> 42
+        CONTENT_LENGTH_REGEX='Content-Length:\s(.*?)'
+        [[ "$trline" =~ $CONTENT_LENGTH_REGEX ]] &&
+            CONTENT_LENGTH=$(echo $trline | sed -E "s/$CONTENT_LENGTH_REGEX/\1/")
+
+        ## Parses the Cookie header
+        ## e.g Cookie: name=John -> name John
+        TOKEN_REGEX='Authorization:\sBearer\s(.*?)'
+        [[ "$trline" =~ $TOKEN_REGEX ]] &&
+            TOKEN=$(echo $trline | sed -E "s/$TOKEN_REGEX/\1/")
     done
+
+      ## Read the remaining HTTP request body
+    if [ ! -z "$CONTENT_LENGTH" ]; then
+        # BODY_REGEX='(.*?)=(.*?)'
+
+        while read -n$CONTENT_LENGTH -t1 line; do
+            echo $line
+            trline=`echo $line | tr -d '[\r\n]'`
+
+            [ -z "$trline" ] && break
+
+            SERVICE_NAME=$( echo $trline | jq '.service' | tr -d '"' )
+        done
+    fi
+
+    echo "=========== HEADERS =============="
+    echo "$REQUEST $CONTENT_LENGTH $TOKEN"
+    echo "=========== BODY =============="
+    echo $SERVICE_NAME
     echo -e "HTTP/1.1 200 OK\r\n" > response
     echo "myService" > /webserver/pipe
 }

@@ -32,8 +32,9 @@ echo "Sending a request to /deploy with a valid token will pass the service name
 
 assert_equal $(cat test-pipe) myService &
 
-curl webserver:8080/ \
-    # -H "Authorization: Bearer <ACCESS_TOKEN>" \
-    # -H "Content-Type: application/json" \
-    # -H '{"service":"myService"}'
+curl webserver:8080/deploy \
+    -H "Authorization: Bearer <ACCESS_TOKEN>" \
+    -H "Content-Type: application/json" \
+    -H "Content-Length: 23" \
+    -d '{"service":"myService"}'
 
