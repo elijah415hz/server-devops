@@ -10,5 +10,7 @@ docker run --rm \
    -v "$(pwd)"/:/tmp/host \
    -e HOST_CWD="$(pwd)" \
    --network=test-network \
+   --name serverhost \
    testhost
-echo "Back on the host"
+echo "Stopping server..."
+docker kill webserver

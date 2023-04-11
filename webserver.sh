@@ -21,7 +21,6 @@ mkfifo response
 # Maybe: Do neither of the above. Instead, just make this a messaging service that just sends to the host whatever it gets. Handle santization and parsing on the host.
 
 function handleRequest() {
-    echo "Handling request..."
     while read line; do
         echo $line
         trline=$(echo $line | tr -d '[\r\n]') ## Removes the \r\n from the EOL
@@ -29,9 +28,8 @@ function handleRequest() {
         ## Breaks the loop when line is empty
         [ -z "$trline" ] && break
     done
-    echo -e "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n</h1>I'M A SERVER!</h1>" > response
-    echo "done"
-    # echo "myService" > /webserver/pipe
+    echo -e "HTTP/1.1 200 OK\r\n" > response
+    echo "myService" > /webserver/pipe
 }
 
 while true; do
@@ -41,7 +39,5 @@ while true; do
   ## 4. the handleRequest function processes the request message and routes it to the response handler, which writes to the FIFO
   ## 5. as soon as the FIFO receives a message, it's sent to the socket
   ## 6. closes the connection (`-N`), closes the socket and repeat the loop
-  echo "listen..."
   cat response | nc -lN 8080 | handleRequest
-  echo "done listening..."
 done
