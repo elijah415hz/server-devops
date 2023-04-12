@@ -49,8 +49,6 @@ function handleRequest() {
 
       ## Read the remaining HTTP request body
     if [ ! -z "$CONTENT_LENGTH" ]; then
-        # BODY_REGEX='(.*?)=(.*?)'
-
         while read -n$CONTENT_LENGTH -t1 line; do
             echo $line
             trline=`echo $line | tr -d '[\r\n]'`
@@ -63,10 +61,16 @@ function handleRequest() {
 
     echo "=========== HEADERS =============="
     echo "$REQUEST $CONTENT_LENGTH $TOKEN"
-    echo "=========== BODY =============="
-    echo $SERVICE_NAME
+
+    # Check token (Get from env variable, test it equals $TOKEN)
+
+    echo $SERVICE_NAME > /webserver/pipe
     echo -e "HTTP/1.1 200 OK\r\n" > response
-    echo "myService" > /webserver/pipe
+
+    case "$REQUEST" in
+        "GET /deploy")   handle_deploy ;; #Implement Me!!
+        *)               handle_not_found ;; # Implement Me!!
+    esac
 }
 
 while true; do

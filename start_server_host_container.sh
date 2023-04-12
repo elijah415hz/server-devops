@@ -12,5 +12,6 @@ docker run --rm \
    --network=test-network \
    --name serverhost \
    testhost
+sleep 1
 echo "Stopping server..."
 docker kill webserver
