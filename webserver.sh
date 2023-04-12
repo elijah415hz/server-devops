@@ -50,7 +50,6 @@ function handleRequest() {
       ## Read the remaining HTTP request body
     if [ ! -z "$CONTENT_LENGTH" ]; then
         while read -n$CONTENT_LENGTH -t1 line; do
-            echo $line
             trline=`echo $line | tr -d '[\r\n]'`
 
             [ -z "$trline" ] && break
@@ -67,10 +66,10 @@ function handleRequest() {
     echo $SERVICE_NAME > /webserver/pipe
     echo -e "HTTP/1.1 200 OK\r\n" > response
 
-    case "$REQUEST" in
-        "GET /deploy")   handle_deploy ;; #Implement Me!!
-        *)               handle_not_found ;; # Implement Me!!
-    esac
+    # case "$REQUEST" in
+    #     "GET /deploy")   handle_deploy ;; #Implement Me!!
+    #     *)               handle_not_found ;; # Implement Me!!
+    # esac
 }
 
 while true; do

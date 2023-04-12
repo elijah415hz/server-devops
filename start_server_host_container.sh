@@ -12,6 +12,11 @@ docker run --rm \
    --network=test-network \
    --name serverhost \
    testhost
+
+if [ $? -ne 0 ]; then
+   echo "Tests Failed"
+fi
+
 sleep 1
 echo "Stopping server..."
-docker kill webserver
+docker kill webserver > /dev/null
