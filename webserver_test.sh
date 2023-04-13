@@ -2,7 +2,7 @@
 
 exitCode=0
 
-function assert_equal() {
+function assert_equal_string() {
     if [ "${1}" == "${2}" ]; then
         echo "********************"
         echo "PASSED"
@@ -17,6 +17,21 @@ function assert_equal() {
     fi
 }
 
+function assert_not_equal_int() {
+    if [ $1 -ne $2 ]; then
+        echo "********************"
+        echo "PASSED"
+        echo "********************"
+        return 0
+    else
+        echo "!!!!!!!!!!!!!!!!!!!!"
+        echo "FAILED"
+        echo "!!!!!!!!!!!!!!!!!!!!"
+        echo "$1 is equal to $2"
+        return 1
+    fi
+}
+
 # TODO: Just call webserver.sh, another docker container may not be necessary here. Having trouble with the actions...
 # I think the only assumption then is that the named pipe works
 
@@ -27,9 +42,11 @@ mkfifo test-pipe
 echo "building the server.."
 docker build . -t "webserver"
 
+SECRET_TOKEN=SoSecret123
 echo "Running the server..."
 docker run --rm \
     -v "$HOST_CWD"/test-pipe:/webserver/pipe \
+    -e SECRET_TOKEN=$SECRET_TOKEN \
     --network=test-network \
     --name webserver \
     webserver &
@@ -41,16 +58,45 @@ echo "Sending a request to /deploy with a valid token will pass the service name
 
 body='{"service":"myService"}'
 
-assert_equal $(cat test-pipe) myServie &
+assert_equal_string $(cat test-pipe) myService &
 ASSERT_EQUAL_PID=$!
 
-curl -s webserver:8080/deploy \
-    -H "Authorization: Bearer <ACCESS_TOKEN>" \
+curl -s -X PUT webserver:8080/deploy \
+    -H "Authorization: Bearer $SECRET_TOKEN" \
     -H "Content-Type: application/json" \
     -H "Content-Length: $( echo -n $body | wc -c )" \
     -d $body \
     > /dev/null
 
 wait $ASSERT_EQUAL_PID
-testStatusCode=$?
-exit $testStatusCode
+TEST_STATUS_CODE=$?
+
+if [ $TEST_STATUS_CODE -ne 0 ]; then
+    exit $TEST_STATUS_CODE
+fi
+
+echo "Sending a request with invalid token will fail"
+
+curl -s -X PUT webserver:8080/deploy \
+    -H "Authorization: Bearer badToken123" \
+    -H "Content-Type: application/json" \
+    -H "Content-Length: $( echo -n $body | wc -c )" \
+    -d $body
+
+assert_not_equal_int $? 0
+if [ $? -ne 0 ]; then
+    exit $?
+fi
+
+echo "Sending a request with invalid token will fail"
+
+curl -s -X PUT webserver:8080/notValid \
+    -H "Authorization: Bearer $SECRET_TOKEN" \
+    -H "Content-Type: application/json" \
+    -H "Content-Length: $( echo -n $body | wc -c )" \
+    -d $body
+
+assert_not_equal_int $? 0
+if [ $? -ne 0 ]; then
+    exit $?
+fi
