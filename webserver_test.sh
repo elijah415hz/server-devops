@@ -54,14 +54,16 @@ sleep 1
 
 echo "Running tests..."
 
-echo "Sending a request to /deploy with a valid token will pass the service name to the pipe"
+echo "======================================================================================"
+echo "Sending a request to /message with a valid token will pass the service name to the pipe"
+echo "======================================================================================"
 
-body='{"service":"myService"}'
+body='{"message":"deploy-myService"}'
 
-assert_equal_string $(cat test-pipe) myService &
+assert_equal_string $(cat test-pipe) "deploy-myService" &
 ASSERT_EQUAL_PID=$!
 
-curl -s -X PUT webserver:8080/deploy \
+curl -s -X POST webserver:8080/message \
     -H "Authorization: Bearer $SECRET_TOKEN" \
     -H "Content-Type: application/json" \
     -H "Content-Length: $( echo -n $body | wc -c )" \
@@ -75,9 +77,11 @@ if [ $TEST_STATUS_CODE -ne 0 ]; then
     exit $TEST_STATUS_CODE
 fi
 
+echo "=============================================="
 echo "Sending a request with invalid token will fail"
+echo "=============================================="
 
-curl -s -X PUT webserver:8080/deploy \
+curl -s -X POST webserver:8080/message \
     -H "Authorization: Bearer badToken123" \
     -H "Content-Type: application/json" \
     -H "Content-Length: $( echo -n $body | wc -c )" \
@@ -87,10 +91,11 @@ assert_not_equal_int $? 0
 if [ $? -ne 0 ]; then
     exit $?
 fi
+echo "=============================================="
+echo "Sending a request with invalid route will fail"
+echo "=============================================="
 
-echo "Sending a request with invalid token will fail"
-
-curl -s -X PUT webserver:8080/notValid \
+curl -s -X POST webserver:8080/notValid \
     -H "Authorization: Bearer $SECRET_TOKEN" \
     -H "Content-Type: application/json" \
     -H "Content-Length: $( echo -n $body | wc -c )" \

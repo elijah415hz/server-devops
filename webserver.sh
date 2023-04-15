@@ -11,8 +11,8 @@ echo "Starting up..."
 rm -f response
 mkfifo response
 
-function handle_deploy() {
-    echo $SERVICE_NAME > /webserver/pipe
+function handle_send_message_to_pipe() {
+    echo $MESSAGE > /webserver/pipe
     echo -n "HTTP/1.1 200 OK\r\n" > response
 }
 
@@ -25,7 +25,7 @@ function handleRequest() {
         echo $line
         trline=$(echo $line | tr -d '[\r\n]') ## Removes the \r\n from the EOL
 
-        ## Breaks the loop when line is empty
+        ## Break the loop when line is empty
         [ -z "$trline" ] && break
 
         ## Parses the headline
@@ -54,12 +54,10 @@ function handleRequest() {
 
             [ -z "$trline" ] && break
 
-            SERVICE_NAME=$( echo $trline | jq '.service' | tr -d '"' )
+            MESSAGE=$( echo $trline | jq '.message' | tr -d '"' )
+            echo $MESSAGE
         done
     fi
-
-    echo "=========== HEADERS =============="
-    echo "$REQUEST $CONTENT_LENGTH $TOKEN"
 
     if [ $SECRET_TOKEN != $TOKEN ]; then
         echo -n "HTTP/1.1 401 Unauthorized\r\nUnauthorized\r\n" > response
@@ -67,8 +65,8 @@ function handleRequest() {
     fi
 
     case "$REQUEST" in
-        "PUT /deploy")   handle_deploy ;; 
-        *)               handle_not_found ;; 
+        "POST /message")    handle_send_message_to_pipe ;; 
+        *)                  handle_not_found ;; 
     esac
 }
 
