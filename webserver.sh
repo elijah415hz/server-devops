@@ -45,6 +45,10 @@ function handleRequest() {
         TOKEN_REGEX='Authorization:\sBearer\s(.*?)'
         [[ "$trline" =~ $TOKEN_REGEX ]] &&
             TOKEN=$(echo $trline | sed -E "s/$TOKEN_REGEX/\1/")
+            echo "env token"
+        echo $SECRET_TOKEN
+        echo "request token"
+        echo $TOKEN
     done
 
       ## Read the remaining HTTP request body
