@@ -12,12 +12,16 @@ rm -f response
 mkfifo response
 
 function handle_send_message_to_pipe() {
+    echo "handle send message to pipe"
     echo -n $MESSAGE > /webserver/pipe
     echo -n "HTTP/1.1 200 OK\r\n" > response
+    echo "complete"
 }
 
 function handle_not_found() {
+    echo "hande not found"
     echo -n "HTTP/1.1 404 OK\r\n" > response
+    echo "complete"
 }
 
 function handleRequest() {
