@@ -49,7 +49,6 @@ function handleRequest() {
         TOKEN_REGEX='Authorization:\sBearer\s(.*?)'
         [[ "$trline" =~ $TOKEN_REGEX ]] &&
             TOKEN=$(echo $trline | sed -E "s/$TOKEN_REGEX/\1/")
-            echo "env token"
     done
 
     # Check auth token
