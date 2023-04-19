@@ -12,7 +12,7 @@ rm -f response
 mkfifo response
 
 function handle_send_message_to_pipe() {
-    echo $MESSAGE > /webserver/pipe
+    echo -n $MESSAGE > /webserver/pipe
     echo -n "HTTP/1.1 200 OK\r\n" > response
 }
 
@@ -46,10 +46,13 @@ function handleRequest() {
         [[ "$trline" =~ $TOKEN_REGEX ]] &&
             TOKEN=$(echo $trline | sed -E "s/$TOKEN_REGEX/\1/")
             echo "env token"
-        echo $SECRET_TOKEN
-        echo "request token"
-        echo $TOKEN
     done
+
+    # Check auth token
+    if [ $SECRET_TOKEN != $TOKEN ]; then
+        echo -n "HTTP/1.1 401 Unauthorized\r\nUnauthorized\r\n" > response
+        return
+    fi
 
       ## Read the remaining HTTP request body
     if [ ! -z "$CONTENT_LENGTH" ]; then
@@ -61,11 +64,6 @@ function handleRequest() {
             MESSAGE=$( echo $trline | jq '.message' | tr -d '"' )
             echo $MESSAGE
         done
-    fi
-
-    if [ $SECRET_TOKEN != $TOKEN ]; then
-        echo -n "HTTP/1.1 401 Unauthorized\r\nUnauthorized\r\n" > response
-        return
     fi
 
     case "$REQUEST" in
