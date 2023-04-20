@@ -53,6 +53,8 @@ function handleRequest() {
 
     # Check auth token
     if [ $SECRET_TOKEN != $TOKEN ]; then
+        echo "Unauthorized request: Token mismatch"
+        echo "Token: $TOKEN"
         echo -n "HTTP/1.1 401 Unauthorized\r\nUnauthorized\r\n" > response
         return
     fi
