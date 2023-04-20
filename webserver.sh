@@ -14,13 +14,13 @@ mkfifo response
 function handle_send_message_to_pipe() {
     echo "handle send message to pipe"
     echo -n $MESSAGE > /webserver/pipe
-    echo -n "HTTP/1.1 200 OK\r\n\r\nSUCCESS" > response
+    echo -n "HTTP/1.1 200 OK\n\nSUCCESS" > response
     echo "complete"
 }
 
 function handle_not_found() {
     echo "hande not found"
-    echo -n "HTTP/1.1 404 OK\r\n\r\nNOT FOUND" > response
+    echo -n "HTTP/1.1 404 OK\n\nNOT FOUND" > response
     echo "complete"
 }
 
@@ -55,7 +55,7 @@ function handleRequest() {
     if [ $SECRET_TOKEN != $TOKEN ]; then
         echo "Unauthorized request: Token mismatch"
         echo "Token: $TOKEN"
-        echo -n "HTTP/1.1 401 Unauthorized\r\r\n\nUnauthorized\r\n" > response
+        echo -n "HTTP/1.1 401 Unauthorized\n\nUnauthorized" > response
         return
     fi
 
