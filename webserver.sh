@@ -14,7 +14,7 @@ mkfifo response
 function handle_send_message_to_pipe() {
     echo "handle send message to pipe"
     echo -n $MESSAGE > /webserver/pipe
-    echo -n "HTTP/1.1 200 OK\n\nSUCCESS" > response
+    echo -n "HTTP/1.1 200 OK\nContent-Type: text/html\n\nSUCCESS" > response
     echo "complete"
 }
 
