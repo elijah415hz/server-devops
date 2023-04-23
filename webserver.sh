@@ -20,7 +20,13 @@ function handle_send_message_to_pipe() {
 
 function handle_not_found() {
     echo "hande not found"
-    printf "HTTP/1.1 404 OK\n\nNOT FOUND" > response
+    printf "HTTP/1.1 404 OK\nContent-Type: text/html\n\nNOT FOUND" > response
+    echo "complete"
+}
+
+function handle_unauthorized() {
+    echo "handle unauthorized"
+    printf "HTTP/1.1 401 Unauthorized\nContent-Type: text/html\n\nUnauthorized" > response
     echo "complete"
 }
 
@@ -53,9 +59,7 @@ function handleRequest() {
 
     # Check auth token
     if [ $SECRET_TOKEN != $TOKEN ]; then
-        echo "Unauthorized request: Token mismatch"
-        echo "Token: $TOKEN"
-        printf "HTTP/1.1 401 Unauthorized\n\nUnauthorized" > response
+        handle_unauthorized
         return
     fi
 
