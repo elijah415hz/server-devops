@@ -15,6 +15,7 @@ docker run --rm \
 
 if [ $? -ne 0 ]; then
    echo "Tests Failed"
+   else echo "Tests Passed"
 fi
 
 sleep 1
